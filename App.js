@@ -2,6 +2,7 @@ import React from 'react'
 import { StyleSheet, SafeAreaView, TextInput, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AntDesign} from '@expo/vector-icons'
 
 const Stack = createNativeStackNavigator();
 
@@ -68,13 +69,15 @@ const DetailsScreen = () => {
 			</AppButton>
 			<View style={{ marginTop: 25 }}>
 				<Text>You have answered:</Text>
-				{refInputs.current.map((value, i) => {
+{/* 				{refInputs.current.map((value, i) => {
 					return <Text key={i} style={styles.answer}>{`${i+ 1} - ${value}`}</Text>
-				})} 
+				})}  */}
 			</View>
 		</ScrollView>
   );
 };
+
+function addInput () {}
 
 const AppButton = ({ onPress, title }) => (
   <TouchableOpacity onPress={onPress} style={styles.appButtonContainer} activeOpacity={0.8}>
