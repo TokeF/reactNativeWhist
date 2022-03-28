@@ -1,9 +1,9 @@
 import React from 'react'
-import { StyleSheet, TextInput, Text, View, ScrollView, Pressable } from 'react-native';
+import { TextInput, Text, View, ScrollView, Pressable } from 'react-native';
 import { AntDesign} from '@expo/vector-icons'
 import { AppButton, styles } from './StyleSheet.js';
 
-const NewGameScreen = () => {
+export function NewGameScreen({navigation}){
 	// this will be attached with each input onChangeText
   const [textValue, setTextValue] = React.useState(''); 
 	// our number of inputs, we can add the length or decrease the length
@@ -57,8 +57,8 @@ const NewGameScreen = () => {
     <ScrollView contentContainerStyle={styles.container}>
         {inputs}
         <AppButton onPress={addInput} title = "Add new" />
+
+         <AppButton onPress={() => navigation.navigate('Rules')} title = "Next" />
 	</ScrollView>
   );
 };
-
-export default NewGameScreen
