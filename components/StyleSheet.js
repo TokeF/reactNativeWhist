@@ -9,7 +9,7 @@ export const AppButton = ({ onPress, title }) => (
 export const styles = StyleSheet.create({
 container: {
     flex: 1,
-    backgroundColor: '#2b2b2b',
+    backgroundColor: '#fffdd0',
     alignItems: 'center',
     justifyContent: 'center',
 },
