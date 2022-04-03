@@ -1,4 +1,4 @@
-import { View, Button } from 'react-native';
+import { View, Button, Text, FlatList } from 'react-native';
 import React from 'react'
 import DropDownPicker from 'react-native-dropdown-picker';
 import react from 'react';
@@ -24,20 +24,37 @@ export default function GameScreen(){
         {label: '12', value: '12'},
         {label: '13', value: '13'}];
 
-    const [value, setValue] = React.useState('alm');
-    const [history, setHistory] = React.useState("nej")
+    const [value, setValue] = React.useState("alm");
+    const [trickValue, setTrick] = React.useState('8');
+    const [history, setHistory] = React.useState(['Cat'])
+
 
     return (
-        <View style={{ flexDirection: 'row', marginTop: 80 }}>
-
-            <Picker default = 'alm' inputItems = {meldinger} setValue={setValue} value={value}/>
-            <Picker default = '8' inputItems = {tricks} />
-            <Button onClick={() => setHistory("JA")}>Hejsa</Button>
-            <h1>hello {value}</h1>
-            <h1>YOYO {history}</h1>
+        <View>
+            <View style={{ flexDirection: 'row', marginTop: 80 }}>
+                <Picker default = 'alm' inputItems = {meldinger} setValue={setValue} value={value}/>
+                <Picker default = '8' inputItems = {tricks} setValue={setTrick} value={trickValue} />
+            </View>
+            <Button 
+                onPress={() => setHistory(history.concat([value]))}
+                title = "Add play"
+            />
+            <Text>hello {value}</Text>
+            <Text>YOYO {trickValue}</Text>
+            <FlatList 
+                data={history}
+                // keyExtractor = {(item, index) => index.toString}
+                renderItem = { (h) => {
+                    return(
+                        <Text>{h.item}</Text>
+                    )
+                }}
+            />
         </View>
     )
 }
+
+const Bet = (melding, trick, caller, partner) => {return {melding: melding, trick: trick, caller: caller, partner: partner}} 
 
 const Picker = (props) => {
     const [open, setOpen] = React.useState(false);
