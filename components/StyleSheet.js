@@ -5,6 +5,12 @@ export const AppButton = ({ onPress, title }) => (
       <Text style={styles.appButtonText}>{title}</Text>
     </TouchableOpacity>
   );
+
+export const AppButtonCustStyle = ({ onPress, title, style }) => (
+<TouchableOpacity onPress={onPress} style={style} activeOpacity={0.8}>
+    <Text style={styles.appButtonText}>{title}</Text>
+</TouchableOpacity>
+);
   
 export const styles = StyleSheet.create({
 container: {

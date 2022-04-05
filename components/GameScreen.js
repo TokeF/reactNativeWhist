@@ -1,8 +1,9 @@
-import { View, Button, Text, FlatList } from 'react-native';
+import { View, Pressable, Button, Text, FlatList } from 'react-native';
 import React from 'react'
 import DropDownPicker from 'react-native-dropdown-picker';
 import react from 'react';
 import { DataTable } from 'react-native-paper';
+import { AppButtonCustStyle, styles } from './StyleSheet.js';
 
 export default function GameScreen(){
 
@@ -32,37 +33,43 @@ export default function GameScreen(){
     names.map((name) => nameDrop.push({label: name, value: name}))
 
     const [value, setValue] = React.useState("alm");
-    const [trickValue, setTrick] = React.useState('8');
+    const [trick, setTrick] = React.useState('8');
     const [caller, setCaller] = React.useState(names[0]);
     const [partner, setPartner] = React.useState(names[1]);
     const [history, setHistory] = React.useState([]);
     const [players, setPlayers] = React.useState(initialPlayers);
 
     function handleOnPress(){
-        const newBet = new Bet(value, trickValue, "caller", "partner");
-        // this.state.players[0].score += 1
+        const newBet = new Bet(value, trick, caller, partner);
         setHistory(history.concat([newBet]))
         const updatedPlayers = {...players}
-        updatedPlayers["Hans"].score +=1
+        updatedPlayers[caller].score +=1
+        updatedPlayers[partner].score +=1
         setPlayers(updatedPlayers)
     }
 
     return (
         <View>
-            <View style={{ flexDirection: 'row', marginTop: 80 }}>
+            
+            
+            <View style={{ flexDirection: 'row', marginTop: 80}}>
                 <Picker default = 'alm' inputItems = {meldinger} setValue={setValue} value={value}/>
-                <Picker default = '8' inputItems = {tricks} setValue={setTrick} value={trickValue} />
+                <Picker default = '8' inputItems = {tricks} setValue={setTrick} value={trick} />
                 <Picker default = {names[0]} inputItems = {nameDrop} setValue={setCaller} value={caller} />
                 <Picker default = {names[1]} inputItems = {nameDrop} setValue={setPartner} value={partner} />
             </View>
-            <Button 
+
+            <AppButtonCustStyle
                 onPress={() => handleOnPress()}
-                title = "Add play"
+                title = "Add Play"
+                style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
             />
-            <Text>hello {value}</Text>
-            <Text>YOYO {trickValue}</Text>
+
             <ScoreTable players = {players}/>
-            <FlatList 
+            
+            
+            <FlatList
+                inverted = {true}
                 data={history}
                 // keyExtractor = {(item, index) => index.toString}
                 renderItem = { (h) => {
@@ -70,7 +77,9 @@ export default function GameScreen(){
                         <Text>{h.item.toString()}</Text>
                     )
                 }}
+                contentContainerStyle = {{flexGrow: 0}}
             />
+        
         </View>
     )
 }
@@ -86,20 +95,16 @@ function ScoreTable(players) {
           </DataTable.Header>
           {
             Object.entries(players).map(([key, value]) => {
-                return(
-                    <div key = {key}>
-                        {
-                            Object.entries(value).map(([k, v]) => {
-                                return(
-                                    <DataTable.Row key = {k}>
-                                        <DataTable.Cell>{v.name}</DataTable.Cell>
-                                        <DataTable.Cell numeric>{v.score}</DataTable.Cell>
-                                        <DataTable.Cell numeric>{v.score}</DataTable.Cell>
-                                    </DataTable.Row>
-                                    )                
-                                })
-                        }
-                    </div>
+                return(    
+                    Object.entries(value).map(([k, v]) => {
+                        return(
+                            <DataTable.Row key = {k}>
+                                <DataTable.Cell>{v.name}</DataTable.Cell>
+                                <DataTable.Cell numeric>{v.score}</DataTable.Cell>
+                                <DataTable.Cell numeric>{v.score}</DataTable.Cell>
+                            </DataTable.Row>
+                            )                
+                        })                    
                 )             
             })
         }
@@ -134,7 +139,7 @@ const Picker = (props) => {
     const [items, setItems] = React.useState(props.inputItems);
 
     return (
-        <View style={{ width: 100 }}>
+        <View style={{ width: 100}}>
             <DropDownPicker
                 open={open}
                 value={props.value}
