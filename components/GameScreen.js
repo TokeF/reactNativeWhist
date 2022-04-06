@@ -2,20 +2,21 @@ import { View, Pressable, Button, Text, FlatList } from 'react-native';
 import React from 'react'
 import DropDownPicker from 'react-native-dropdown-picker';
 import react from 'react';
-import { DataTable } from 'react-native-paper';
+import { DataTable, Switch } from 'react-native-paper';
 import { AppButtonCustStyle, styles } from './StyleSheet.js';
+import SwitchSelector from "react-native-switch-selector";
 
-export default function GameScreen(){
+export default function GameScreen({route, navigation}){
 
     const meldinger = [
-        {label: 'Alm.', value: 'alm'},
-        {label: 'Vip', value: 'vip'},
-        {label: 'Halve', value: 'halve'},
-        {label: 'Sang', value: 'sang'},
-        {label: 'Gode', value: 'gode'},
-        {label: 'Sol', value: 'sol'},
-        {label: 'Ren Sol', value: 'rsol'},
-        {label: 'Bordlægger', value: 'bord'}];
+        {label: 'Alm.', value: 'alm', point: 1},
+        {label: 'Vip', value: 'vip', point: 1},
+        {label: 'Halve', value: 'halve', point: 2},
+        {label: 'Sang', value: 'sang', point: 2},
+        {label: 'Gode', value: 'gode', point: 1},
+        {label: 'Sol', value: 'sol', point: 1},
+        {label: 'Ren Sol', value: 'rsol', point: 2},
+        {label: 'Bordlægger', value: 'bord', point: 2}];
         
     const tricks = [
         {label: '7', value: '7'},
@@ -26,25 +27,29 @@ export default function GameScreen(){
         {label: '12', value: '12'},
         {label: '13', value: '13'}];
     
-    const names = ["Hans", "Toke", "Lars", "Peter"]
+    const names = Object.values(route.params.paramKey.current)
+    
     const initialPlayers = {}
     names.map((name) => initialPlayers[name] = new Player(name))
     const nameDrop = []
     names.map((name) => nameDrop.push({label: name, value: name}))
 
-    const [value, setValue] = React.useState("alm");
-    const [trick, setTrick] = React.useState('8');
+    const [trick, setValue] = React.useState("alm");
+    const [value, setTrick] = React.useState('8');
     const [caller, setCaller] = React.useState(names[0]);
     const [partner, setPartner] = React.useState(names[1]);
     const [history, setHistory] = React.useState([]);
     const [players, setPlayers] = React.useState(initialPlayers);
+    const [isWin, setIsWin] = React.useState(1);
+    console.log(isWin)
 
     function handleOnPress(){
-        const newBet = new Bet(value, trick, caller, partner);
-        setHistory(history.concat([newBet]))
         const updatedPlayers = {...players}
-        updatedPlayers[caller].score +=1
-        updatedPlayers[partner].score +=1
+        const points = CalculatePoints(value, trick, value, isWin, meldinger)
+        const newBet = new Bet(trick, value, caller, partner, points);
+        setHistory(history.concat([newBet]))
+        updatedPlayers[caller].score += points
+        updatedPlayers[partner].score += points
         setPlayers(updatedPlayers)
     }
 
@@ -53,11 +58,21 @@ export default function GameScreen(){
             
             
             <View style={{ flexDirection: 'row', marginTop: 80}}>
-                <Picker default = 'alm' inputItems = {meldinger} setValue={setValue} value={value}/>
-                <Picker default = '8' inputItems = {tricks} setValue={setTrick} value={trick} />
+                <Picker default = 'alm' inputItems = {meldinger} setValue={setValue} value={trick}/>
+                <Picker default = '8' inputItems = {tricks} setValue={setTrick} value={value} />
                 <Picker default = {names[0]} inputItems = {nameDrop} setValue={setCaller} value={caller} />
                 <Picker default = {names[1]} inputItems = {nameDrop} setValue={setPartner} value={partner} />
             </View>
+            {console.log(route.params.paramKey)}
+            
+            <SwitchSelector
+                options={[
+                    { label: "Won", value: 1 },
+                    { label: "Lost", value: -1 }
+                ]}
+                initial={0}
+                onPress={value => setIsWin(value)}
+            />
 
             <AppButtonCustStyle
                 onPress={() => handleOnPress()}
@@ -83,6 +98,15 @@ export default function GameScreen(){
         </View>
     )
 }
+
+const SwitchComponent = () => {
+    const [isSwitchOn, setIsSwitchOn] = React.useState(false);
+  
+    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
+  
+    return <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />;
+  };
+  
 
 function ScoreTable(players) {
     
@@ -112,8 +136,21 @@ function ScoreTable(players) {
     );
 }
 
-function TableEntry(){
+/* Hvis man går hjem: c^(S-8)*(1+(ST-S)/h)*b*M*N
+Hvis man ikke går hjem: c^(S-8)*(-1+ST-S/h)*M*N
+Hvor c er en eksponentiel faktor, S er stik meldt, ST er stik taget, b er gå hjem bonus, h er hældningen, M er meldingen og N er en normeringsfaktor. De vigtige faktorer vi her har ændret på er c og h. Vi har øget c så man bliver belønnet for at melde højere, og vi har øget h, så man bliver belønnet mindre for at gå over. */
 
+function CalculatePoints(amtCalled, trick, amtWon, isWin, meldinger){
+    const c = 2
+    const h = 2
+    const n = 1
+    const winBonus = 1
+
+    const trickFactor = (meldinger.find(x => x.value == trick)).point
+
+    var point = c ** (amtCalled - 7) * (1 + (amtWon - amtCalled) / h) * winBonus * trickFactor * n * isWin
+    console.log("Points: " + point)
+    return Math.ceil(point)
 }
 
 
@@ -122,14 +159,15 @@ class Player {
 }
 
 class Bet {
-    constructor(melding, trick, caller, partner) { 
+    constructor(melding, trick, caller, partner, points) { 
         this.melding = melding,
         this.trick = trick,
         this.caller = caller,
         this.partner = partner
+        this.points = points
     }
     toString() {
-        return `${this.trick} ${this.melding} ${this.caller} ${this.partner}`;
+        return `${this.trick} ${this.melding} ${this.caller} ${this.partner} ${this.points} `;
     }
 } 
 

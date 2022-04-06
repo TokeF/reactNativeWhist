@@ -57,8 +57,11 @@ export function NewGameScreen({navigation}){
     <ScrollView contentContainerStyle={styles.container}>
         {inputs}
         <AppButton onPress={addInput} title = "Add new" />
-
-         <AppButton onPress={() => navigation.navigate('Rules')} title = "Next" />
+          {console.log(refInputs)}
+          {console.log("hej " + refInputs.current)}
+          {console.log(typeof refInputs.current[0])}
+        
+         <AppButton onPress={() => navigation.navigate('Rules', {paramKey: refInputs})} title = "Next" />
 	</ScrollView>
   );
 };
