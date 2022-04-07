@@ -5,7 +5,6 @@ export default function GameRulesSetupScreen({route, navigation})
 {
     return (
         <View style = {styles.container}>
-            {console.log(route.params.paramKey)}
             <AppButton onPress={() => navigation.navigate('Game', {paramKey: route.params.paramKey})} title = "Next" />
         </View>
     )

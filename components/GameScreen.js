@@ -1,8 +1,7 @@
-import { View, Pressable, Button, Text, FlatList } from 'react-native';
-import React from 'react'
+import { View, Pressable, Text, FlatList } from 'react-native';
+import React, {useEffect} from 'react'
 import DropDownPicker from 'react-native-dropdown-picker';
-import react from 'react';
-import { DataTable, Switch } from 'react-native-paper';
+import { DataTable, Button, Dialog, Portal , Provider, Paragraph} from 'react-native-paper';
 import { AppButtonCustStyle, styles } from './StyleSheet.js';
 import SwitchSelector from "react-native-switch-selector";
 
@@ -10,15 +9,22 @@ export default function GameScreen({route, navigation}){
 
     const meldinger = [
         {label: 'Alm.', value: 'alm', point: 1},
-        {label: 'Vip', value: 'vip', point: 1},
-        {label: 'Halve', value: 'halve', point: 2},
-        {label: 'Sang', value: 'sang', point: 2},
-        {label: 'Gode', value: 'gode', point: 1},
-        {label: 'Sol', value: 'sol', point: 1},
-        {label: 'Ren Sol', value: 'rsol', point: 2},
-        {label: 'Bordlægger', value: 'bord', point: 2}];
+        {label: 'Vip', value: 'vip', point: 1.5},
+        {label: 'Halve', value: 'halve', point: 1.5},
+        {label: 'Sang', value: 'sang', point: 1.5},
+        {label: 'Gode', value: 'gode', point: 1.5},
+        {label: 'Sol', value: 'sol', point: 0.5},
+        {label: 'Ren Sol', value: 'rsol', point: 1.5},
+        {label: 'Bordlægger', value: 'bord', point: 1.5}];
         
-    const tricks = [
+    const maxValues = [
+        {label: '0', value: '0'},
+        {label: '1', value: '1'},
+        {label: '2', value: '2'},
+        {label: '3', value: '3'},
+        {label: '4', value: '4'},
+        {label: '5', value: '5'},
+        {label: '6', value: '6'},
         {label: '7', value: '7'},
         {label: '8', value: '8'},
         {label: '9', value: '9'},
@@ -26,6 +32,8 @@ export default function GameScreen({route, navigation}){
         {label: '11', value: '11'},
         {label: '12', value: '12'},
         {label: '13', value: '13'}];
+
+    const values = maxValues.slice(7);
     
     const names = Object.values(route.params.paramKey.current)
     
@@ -34,19 +42,25 @@ export default function GameScreen({route, navigation}){
     const nameDrop = []
     names.map((name) => nameDrop.push({label: name, value: name}))
 
-    const [trick, setValue] = React.useState("alm");
-    const [value, setTrick] = React.useState('8');
+    const [trick, setTrick] = React.useState("alm");
+    const [value, setValue] = React.useState('8');
     const [caller, setCaller] = React.useState(names[0]);
     const [partner, setPartner] = React.useState(names[1]);
     const [history, setHistory] = React.useState([]);
     const [players, setPlayers] = React.useState(initialPlayers);
     const [isWin, setIsWin] = React.useState(1);
-    console.log(isWin)
+    const [visible, setVisible] = React.useState(false);
+    const [actualValue, setActualValue] = React.useState(value);
+    const [actualValues, setActualValues] = React.useState(values.slice(value-7));
+
+    const showDialog = () => setVisible(true);
+
+    const hideDialog = () => setVisible(false);
 
     function handleOnPress(){
         const updatedPlayers = {...players}
-        const points = CalculatePoints(value, trick, value, isWin, meldinger)
-        const newBet = new Bet(trick, value, caller, partner, points);
+        const points = CalculatePoints(value, trick, actualValue, isWin, meldinger)
+        const newBet = new Bet(trick, value, caller, partner, points, actualValue);
         setHistory(history.concat([newBet]))
         updatedPlayers[caller].score += points
         updatedPlayers[partner].score += points
@@ -54,16 +68,30 @@ export default function GameScreen({route, navigation}){
     }
 
     return (
+        <Provider>
         <View>
             
             
             <View style={{ flexDirection: 'row', marginTop: 80}}>
-                <Picker default = 'alm' inputItems = {meldinger} setValue={setValue} value={trick}/>
-                <Picker default = '8' inputItems = {tricks} setValue={setTrick} value={value} />
+                <Picker default = 'alm' inputItems = {meldinger} setValue={setTrick} value={trick}/>
+                <Picker default = '8' inputItems = {values} setValue={setValue} value={value} />
                 <Picker default = {names[0]} inputItems = {nameDrop} setValue={setCaller} value={caller} />
                 <Picker default = {names[1]} inputItems = {nameDrop} setValue={setPartner} value={partner} />
             </View>
-            {console.log(route.params.paramKey)}
+            
+            <View>
+                <Portal>
+                    <Dialog visible={visible} onDismiss={hideDialog} style={{height: '40%'}}>
+                        <Dialog.Title>Actual tricks Won</Dialog.Title>
+                        <Dialog.Content>
+                            <Picker default = {value} inputItems = {actualValues} setValue={setActualValue} value={actualValue} />
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => {hideDialog(); handleOnPress();}}>Done</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+            </View>
             
             <SwitchSelector
                 options={[
@@ -71,11 +99,26 @@ export default function GameScreen({route, navigation}){
                     { label: "Lost", value: -1 }
                 ]}
                 initial={0}
-                onPress={value => setIsWin(value)}
+                onPress={value => {
+                    setIsWin(value);
+                    if(value < 0){
+                        
+                    }
+                    }
+                }
             />
 
             <AppButtonCustStyle
-                onPress={() => handleOnPress()}
+                onPress={() => {
+                    if(isWin < 0){
+                        setActualValues(maxValues.slice(0,value))
+                        setActualValue((value - 1).toString());
+                    }
+                    else {
+                        setActualValues(values.slice(value-7)); 
+                        setActualValue(value);
+                    }
+                    showDialog();}}
                 title = "Add Play"
                 style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
             />
@@ -96,17 +139,9 @@ export default function GameScreen({route, navigation}){
             />
         
         </View>
+        </Provider>
     )
 }
-
-const SwitchComponent = () => {
-    const [isSwitchOn, setIsSwitchOn] = React.useState(false);
-  
-    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
-  
-    return <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />;
-  };
-  
 
 function ScoreTable(players) {
     
@@ -148,10 +183,31 @@ function CalculatePoints(amtCalled, trick, amtWon, isWin, meldinger){
 
     const trickFactor = (meldinger.find(x => x.value == trick)).point
 
-    var point = c ** (amtCalled - 7) * (1 + (amtWon - amtCalled) / h) * winBonus * trickFactor * n * isWin
+    var point = c ** (amtCalled - 7) * (isWin + (amtWon - amtCalled) / h) * winBonus * trickFactor * n
     console.log("Points: " + point)
     return Math.ceil(point)
 }
+
+function MyComponent ({setVisible, visible}) {
+ 
+    return (
+      
+        <View>
+          <Portal>
+            <Dialog visible={visible} onDismiss={setVisible(false)}>
+              <Dialog.Title>Alert</Dialog.Title>
+              <Dialog.Content>
+                <Paragraph>This is simple dialog</Paragraph>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={setVisible(false)}>Done</Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+        </View>
+      
+    );
+  };
 
 
 class Player {
@@ -159,15 +215,16 @@ class Player {
 }
 
 class Bet {
-    constructor(melding, trick, caller, partner, points) { 
+    constructor(melding, trick, caller, partner, points, actualValue) { 
         this.melding = melding,
         this.trick = trick,
         this.caller = caller,
         this.partner = partner
         this.points = points
+        this.actualValue = actualValue
     }
     toString() {
-        return `${this.trick} ${this.melding} ${this.caller} ${this.partner} ${this.points} `;
+        return `Bet: ${this.trick}, Act: ${this.actualValue} ${this.melding} ${this.caller} ${this.partner} Points: ${this.points} `;
     }
 } 
 

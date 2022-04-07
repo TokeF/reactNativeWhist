@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "getting_started_expo",
-    "slug": "getting_started_expo",
+    "name": "WhistPoints",
+    "slug": "WhistPoints",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/pcards.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
