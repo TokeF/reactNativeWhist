@@ -111,7 +111,7 @@ export default function GameScreen({route, navigation}){
             <AppButtonCustStyle
                 onPress={() => {
                     if(isWin < 0){
-                        setActualValues(maxValues.slice(0,value))
+                        setActualValues(maxValues.slice(0,value).reverse())
                         setActualValue((value - 1).toString());
                     }
                     else {
@@ -187,27 +187,6 @@ function CalculatePoints(amtCalled, trick, amtWon, isWin, meldinger){
     console.log("Points: " + point)
     return Math.ceil(point)
 }
-
-function MyComponent ({setVisible, visible}) {
- 
-    return (
-      
-        <View>
-          <Portal>
-            <Dialog visible={visible} onDismiss={setVisible(false)}>
-              <Dialog.Title>Alert</Dialog.Title>
-              <Dialog.Content>
-                <Paragraph>This is simple dialog</Paragraph>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <Button onPress={setVisible(false)}>Done</Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
-        </View>
-      
-    );
-  };
 
 
 class Player {
