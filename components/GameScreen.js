@@ -4,8 +4,10 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { DataTable, Button, Dialog, Portal , Provider, Paragraph} from 'react-native-paper';
 import { AppButtonCustStyle, styles } from './StyleSheet.js';
 import SwitchSelector from "react-native-switch-selector";
+import { GetScoreTable, SetScoreTable, GameStateSave } from './util/GameStateSave.js';
 
 export default function GameScreen({route, navigation}){
+    const save = new GameStateSave();
 
     const meldinger = [
         {label: 'Alm.', value: 'alm', point: 1},
@@ -120,6 +122,18 @@ export default function GameScreen({route, navigation}){
                     }
                     showDialog();}}
                 title = "Add Play"
+                style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
+            />
+
+            <AppButtonCustStyle
+                onPress={() => {save.SetScoreTable(names)}}
+                title = "Save Game"
+                style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
+            />
+
+            <AppButtonCustStyle
+                onPress={() => {console.log(save.GetScoreTable())}}
+                title = "Get Game"
                 style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
             />
 
