@@ -4,11 +4,10 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { DataTable, Button, Dialog, Portal , Provider, Paragraph} from 'react-native-paper';
 import { AppButtonCustStyle, styles } from './StyleSheet.js';
 import SwitchSelector from "react-native-switch-selector";
-import { GetScoreTable, SetScoreTable, GameStateSave } from './util/GameStateSave.js';
+import GameStateSave from './util/GameStateSave.js';
+import {setData, getData} from './PersistentStorage.js'
 
 export default function GameScreen({route, navigation}){
-    const save = new GameStateSave();
-
     const meldinger = [
         {label: 'Alm.', value: 'alm', point: 1},
         {label: 'Vip', value: 'vip', point: 1.5},
@@ -126,13 +125,13 @@ export default function GameScreen({route, navigation}){
             />
 
             <AppButtonCustStyle
-                onPress={() => {save.SetScoreTable(names)}}
+                onPress={() => setData(512, new GameStateSave(names, history))}
                 title = "Save Game"
                 style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
             />
 
             <AppButtonCustStyle
-                onPress={() => {console.log(save.GetScoreTable())}}
+                onPress={() => {console.log(getData(512).names)}}
                 title = "Get Game"
                 style = {{backgroundColor: "#009688", paddingVertical: 10, paddingHorizontal: 12}}
             />
